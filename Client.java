@@ -1,6 +1,8 @@
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -10,6 +12,7 @@ public class Client
     
     private Socket socket = null;
     private BufferedReader input = null;
+    private DataInputStream responseInput = null;
     private DataOutputStream output = null;
 
     public Client(String address, int port) 
@@ -21,7 +24,7 @@ public class Client
             System.out.println("Connected");
             
             input = new BufferedReader(new InputStreamReader(System.in));
-
+            responseInput = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             output = new DataOutputStream(socket.getOutputStream());
 
         }
@@ -41,8 +44,12 @@ public class Client
             try
             {
                 line = input.readLine();
+                
+                output.writeUTF(line);
 
-                System.out.print("Echo: " + line);
+                String response = responseInput.readUTF();
+
+                System.out.println(response);
             }
             catch(IOException e)
             {
@@ -65,7 +72,6 @@ public class Client
     }
     
     public static void main(String[] args) {
-        System.out.println(args[0] + " " + args[1]);
         Client client = new Client(args[0], Integer.parseInt(args[1]));
     }
         
