@@ -3,6 +3,8 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.sound.midi.SysexMessage;
+
 import com.socket.assignment.Calculator;
 import com.socket.assignment.ICalculator;
 
@@ -22,7 +24,6 @@ public class Server
     
     public Server(int port)
     {
-        
         try
         {
             server = ConnectToPort(port);
@@ -32,8 +33,7 @@ public class Server
             System.out.println("Waiting for client to connect...");
             
             socket = server.accept();
-            
-            System.out.println("Client accepted!");
+            System.out.println("Connected by client on " + socket.getLocalAddress());
             
             // Getting input from the client socket.
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -41,16 +41,20 @@ public class Server
 
             String line = "";
 
-            while(!line.equals("Over"))
+            while(true)
             {
                 try
                 {
                     line = in.readUTF();
 
-                    
+                    if(line.equals("0 / 0 =")) break;
+
+                    System.out.println("Received question " + '\"' + line + '\"');
 
                     String answ = ProcessOperation(line);
                     
+                    System.out.println("Send back answer " + '\"' + answ + '\"');
+
                     output.writeUTF("Answer from server: " + answ);
                 }
                 catch(IOException e)
@@ -107,7 +111,7 @@ public class Server
 
     public static String ProcessOperation(String line)
     {
-        Pattern p = Pattern.compile("^([\\d]+)\\s*([*/+-]{1})\\s*([\\d]+)$");
+        Pattern p = Pattern.compile("^([\\d]+)\\s*([*/+-]{1})\\s*([\\d]+)\\s*[=]{1}\\s*$");
         Matcher m = p.matcher(line);
         
         if(!m.matches()) return "Input error. Re-type the math question again.";
@@ -149,16 +153,10 @@ public class Server
                 return "Something went horribly wrong!";
         }
 
-        return FormatResult(x, y, operator, result);
-    }
-
-    public static String FormatResult(float x, float y, Character op, float result)
-    {
-        return (String.valueOf(x) + op + String.valueOf(y) + '=' + String.valueOf(result));
+        return String.valueOf(result);
     }
 
     public static void main(String[] args) {
-        //Server server = new Server(Integer.parseInt(args[0]));
-        Server server = new Server(5000);
+        Server server = new Server(Integer.parseInt(args[0]));
     }
 }

@@ -39,7 +39,7 @@ public class Client
 
         String line = "";
 
-        while(!line.equals("Over"))
+        while(!line.equals("0 / 0 ="))
         {
             try
             {
@@ -54,6 +54,7 @@ public class Client
             catch(IOException e)
             {
                 System.err.println(e);
+                break;
             }
 
         }
