@@ -27,44 +27,50 @@ public class Client
             responseInput = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             output = new DataOutputStream(socket.getOutputStream());
 
-        }
-        catch(UnknownHostException e)
-        {
-            System.err.println(e);
-        }
-        catch(IOException e)
-        {
-            System.err.println(e);
-        }
+            String line = "";
 
-        String line = "";
-
-        while(!line.equals("0 / 0 ="))
-        {
-            try
+            while(true)
             {
-                line = input.readLine();
-                
-                if(line == null) break;
-
-                output.writeUTF(line);
-
-                if(line.equals("0 / 0 ="))
+                try
                 {
-                    System.out.println("Exiting, closing connection...");
+                    if(socket.isClosed())
+                    {
+                        System.err.println("Server socket was closed, closing connection...");
+                        break;
+                    }
+
+                    line = input.readLine();
+
+                    if(line == null) continue;
+
+                    output.writeUTF(line);
+                    
+                    if(line.equals("0 / 0 ="))
+                    {
+                        System.out.println("Exiting, closing connection...");
+                        break;
+                    }
+
+                    String response = responseInput.readUTF();
+                    
+                    System.out.println(response);
+                }
+                catch(IOException e)
+                {
+                    
+                    System.err.println(e.getStackTrace());
                     break;
                 }
 
-                String response = responseInput.readUTF();
-
-                System.out.println(response);
             }
-            catch(IOException e)
-            {
-                System.err.println(e);
-                break;
-            }
-
+        }
+        catch(UnknownHostException e)
+        {
+            System.err.println(e.getStackTrace());
+        }
+        catch(IOException e)
+        {
+            System.err.println(e.getStackTrace());
         }
 
         try
@@ -75,7 +81,7 @@ public class Client
         }
         catch(IOException e)
         {
-            System.err.println(e);
+            System.err.println(e.getStackTrace());
         }
 
     }
