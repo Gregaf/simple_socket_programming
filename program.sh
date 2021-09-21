@@ -2,7 +2,11 @@
 
 port=5000
 
-java Server.java $port > server_output.txt &
-sleep 1
-java Client.java localhost $port < input.txt  > client_output.txt &
+>error_log.txt
+
+java Server.java $port > server_output.txt 2>> error_log.txt &
+sleep 2
+cat input.txt | java Client.java localhost $port > client_output.txt 2>> error_log.txt &
+
+jobs
 
