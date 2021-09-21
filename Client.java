@@ -21,6 +21,11 @@ public class Client
         {
             socket = new Socket(address, port);
             
+            if(socket.getPort() != port)
+            {
+                System.out.println("The port number supplied was used, try connecting on port " + socket.getPort());
+            }
+
             System.out.println("Connected");
             
             input = new BufferedReader(new InputStreamReader(System.in));
