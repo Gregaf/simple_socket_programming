@@ -45,7 +45,15 @@ public class Client
             {
                 line = input.readLine();
                 
+                if(line == null) break;
+
                 output.writeUTF(line);
+
+                if(line.equals("0 / 0 ="))
+                {
+                    System.out.println("Exiting, closing connection...");
+                    break;
+                }
 
                 String response = responseInput.readUTF();
 
