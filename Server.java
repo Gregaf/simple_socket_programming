@@ -27,29 +27,39 @@ public class Server
             
             if(server == null) throw new NullPointerException("Failed to find open port.");
             System.out.println("Server Started");
-            System.out.println("Waiting for client to connect...");
             
-            socket = server.accept();
-            System.out.println("Connected by client on " + socket.getLocalAddress());
-            
-            // Getting input from the client socket.
-            in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            output = new DataOutputStream(socket.getOutputStream());
-
-            String line = "";
-
-            // Must check that there are bytes able to read otherwise EOF exception will be thrown.
-            while(in.available() > 0)
+            while(true)
             {
+                if(socket == null || socket.isClosed())
+                {
+                    System.out.println("Waiting for client to connect...");
+                    socket = server.accept();
+                    System.out.println("Connected by client on " + socket.getLocalAddress());
+
+                    // Getting input from the client socket.
+                    in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                    output = new DataOutputStream(socket.getOutputStream());
+
+                }
+
+                String line = "";
+
                 try
                 {
-                    line = in.readUTF();
+                    //if(in.available() > 0) continue;
 
-                    
+                    line = in.readUTF();
 
                     System.out.println("Received question " + '\"' + line + '\"');
                     
-                    if(line.equals("0 / 0 =")) break;
+                    if(line.equals("0 / 0 ="))
+                    {
+                        System.out.println("Signaled to quit, closing connection");
+                        output.close();
+                        in.close();
+                        socket.close();
+                        break;
+                    }
                     
                     String answ = ProcessOperation(line);
                     
@@ -59,25 +69,24 @@ public class Server
                 }
                 catch(IOException e)
                 {
-                    System.err.println(line);
-                    e.printStackTrace();
+                    System.err.println("Lost connection to client, closing client streams...");
+                    System.err.println(e.getStackTrace());
+                    output.close();
+                    in.close();
+                    // e.printStackTrace();
                 }
                 
             }
 
-            System.out.println("Closing connection");
-
-            socket.close();
-            in.close();
-            //server.close();
+            server.close();
         }
         catch(NullPointerException e)
         {
-            System.err.println(e);
+            e.printStackTrace();
         }
         catch(Exception e)
         {
-            System.err.println(e);
+            e.printStackTrace();
         }
 
     }
@@ -95,6 +104,7 @@ public class Server
             {
                 serverSocket = new ServerSocket(portAttempting);
                 
+                System.out.println("Listening on Port: " + portAttempting);
             }
             catch(Exception e)
             {
