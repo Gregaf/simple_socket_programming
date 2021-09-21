@@ -3,8 +3,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.sound.midi.SysexMessage;
-
 import com.socket.assignment.Calculator;
 import com.socket.assignment.ICalculator;
 
@@ -13,7 +11,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-
 
 public class Server 
 {
@@ -41,16 +38,19 @@ public class Server
 
             String line = "";
 
-            while(true)
+            // Must check that there are bytes able to read otherwise EOF exception will be thrown.
+            while(in.available() > 0)
             {
                 try
                 {
                     line = in.readUTF();
 
-                    if(line.equals("0 / 0 =")) break;
+                    
 
                     System.out.println("Received question " + '\"' + line + '\"');
-
+                    
+                    if(line.equals("0 / 0 =")) break;
+                    
                     String answ = ProcessOperation(line);
                     
                     System.out.println("Send back answer " + '\"' + answ + '\"');
@@ -59,8 +59,8 @@ public class Server
                 }
                 catch(IOException e)
                 {
-                    System.err.println(e);
-                    break;
+                    System.err.println(line);
+                    e.printStackTrace();
                 }
                 
             }
@@ -69,7 +69,7 @@ public class Server
 
             socket.close();
             in.close();
-            server.close();
+            //server.close();
         }
         catch(NullPointerException e)
         {
